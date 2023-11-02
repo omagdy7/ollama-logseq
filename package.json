@@ -1,0 +1,29 @@
+{
+  "name": "ollama-logseq",
+  "version": "0.0.1",
+  "description": "Integrate ollama with logseq and utilizing local LLMs",
+  "main": "dist/index.html",
+  "targets": {
+    "main": false
+  },
+  "default": "dist/index.html",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omagdy7/ollama-logseq"
+  },
+  "author": "Logseq",
+  "scripts": {
+    "dev": "parcel ./index.html --public-url ./",
+    "build": "parcel build --public-url . --no-source-maps index.html"
+  },
+  "license": "MIT",
+  "logseq": {
+    "id": "_rw0rys037"
+  },
+  "dependencies": {
+    "@logseq/libs": "^0.0.1-alpha.22"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.0"
+  }
+}
