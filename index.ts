@@ -1,63 +1,91 @@
 import '@logseq/libs'
-import { LSPluginBaseInfo } from '@logseq/libs/dist/libs'
+import { LSPluginBaseInfo } from '@logseq/libs/dist/LSPlugin'
+import { SettingSchemaDesc } from '@logseq/libs/dist/LSPlugin';
 
 const delay = (t = 100) => new Promise(r => setTimeout(r, t))
 
-async function loadRedditData () {
-  const endpoint = 'https://www.reddit.com/r/logseq/hot.json'
+let settings: SettingSchemaDesc[] = [
+  {
+    key: "host",
+    type: "string",
+    title: "Host",
+    description: "Set the host of your ollama model",
+    default: "localhost:11434"
+  },
+  {
+    key: "model",
+    type: "string",
+    title: "LLM Model",
+    description: "Set your desired model to use ollama",
+    default: "mistral:instruct"
+  },
+]
 
-  const { data: { children } } = await fetch(endpoint).then(res => res.json())
-  const ret = children || []
-
-  return ret.map(({ data }, i) => {
-    const { title, selftext, url, ups, downs, num_comments } = data
-
-    return `${i}. [${title}](${url}) [:small.opacity-50 "🔥 ${ups} 💬 ${num_comments}"]
-collapsed:: true    
-> ${selftext}`
+async function promptLLM(url: string, prompt: string, model: string) {
+  const response = await fetch('http://localhost:11434/api/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: model,
+      prompt: prompt,
+      stream: false,
+    }),
   })
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const data = await response.json();
+
+  return data.response;
+
 }
 
 /**
  * main entry
  * @param baseInfo
  */
-function main (baseInfo: LSPluginBaseInfo) {
+function main(baseInfo: LSPluginBaseInfo) {
+  logseq.useSettingsSchema(settings)
   let loading = false
 
   logseq.provideModel({
-    async loadReddits () {
+    async summarize() {
 
       const info = await logseq.App.getUserConfigs()
       if (loading) return
 
-      const pageName = 'reddit-logseq-hots-news'
-      const blockTitle = (new Date()).toLocaleString()
-
-      logseq.App.pushState('page', { name: pageName })
 
       await delay(300)
 
       loading = true
 
+
+      logseq.App.showMsg(`
+          [:div.p-2
+            [:h1 "response"]
+            [:h2.text-xl "Hello"]]
+        `)
+
       try {
-        const currentPage = await logseq.Editor.getCurrentPage()
-        if (currentPage?.originalName !== pageName) throw new Error('page error')
+        const currentSelectedBlocks = await logseq.Editor.getCurrentPageBlocksTree()
+        let blocksContent = ""
+        if (currentSelectedBlocks) {
+          let lastBlock: any = currentSelectedBlocks[currentSelectedBlocks.length - 1]
+          for (const block of currentSelectedBlocks) {
+            blocksContent += block.content + "/n"
+          }
+          if (lastBlock) {
+            lastBlock = await logseq.Editor.insertBlock(lastBlock.uuid, '🚀 Summarizing....', { before: false })
+          }
 
-        const pageBlocksTree = await logseq.Editor.getCurrentPageBlocksTree()
-        let targetBlock = pageBlocksTree[0]!
+          const summary = await promptLLM(logseq.settings.host, `Summarize the following ${blocksContent}`, logseq.settings.model)
 
-        targetBlock = await logseq.Editor.insertBlock(targetBlock.uuid, '🚀 Fetching r/logseq ...', { before: true })
+          await logseq.Editor.updateBlock(lastBlock.uuid, `Summary: ${summary}`)
+        }
 
-        let blocks = await loadRedditData()
-
-        blocks = blocks.map(it => ({ content: it }))
-
-        await logseq.Editor.insertBatchBlock(targetBlock.uuid, blocks, {
-          sibling: false
-        })
-
-        await logseq.Editor.updateBlock(targetBlock.uuid, `## 🔖 r/logseq - ${blockTitle}`)
       } catch (e) {
         logseq.App.showMsg(e.toString(), 'warning')
         console.error(e)
@@ -67,10 +95,33 @@ function main (baseInfo: LSPluginBaseInfo) {
     }
   })
 
+
+  logseq.Editor.registerBlockContextMenuItem('Summarize with AI',
+    async () => {
+      logseq.App.showMsg(
+        'Summarizing....'
+      );
+      const currentSelectedBlocks = await logseq.Editor.getCurrentPageBlocksTree()
+      let blocksContent = ""
+      if (currentSelectedBlocks != undefined) {
+        let lastBlock: any = currentSelectedBlocks[currentSelectedBlocks.length - 1]
+        for (const block in currentSelectedBlocks) {
+          blocksContent += currentSelectedBlocks[block].content + "/n"
+        }
+        if (lastBlock) {
+          lastBlock = await logseq.Editor.insertBlock(lastBlock.uuid, '🚀 Summarizing....', { before: false })
+        }
+
+        const summary = await promptLLM(logseq.settings.host, `Summarize the following ${blocksContent}`, logseq.settings.model)
+
+        await logseq.Editor.updateBlock(lastBlock.uuid, `Summary: ${summary}`)
+      }
+    })
+
   logseq.App.registerUIItem('toolbar', {
     key: 'logseq-reddit',
     template: `
-      <a data-on-click="loadReddits"
+      <a data-on-click="summarize"
          class="button">
         <i class="ti ti-brand-reddit"></i>
       </a>
