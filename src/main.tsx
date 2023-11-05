@@ -7,15 +7,12 @@ import "./index.css";
 
 import { logseq as PL } from "../package.json";
 import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin";
+import { ollamaUI } from "./ollama";
 
 // @ts-expect-error
 const css = (t, ...args) => String.raw(t, ...args);
 
-const delay = (t = 100) => new Promise(r => setTimeout(r, t))
-
 const pluginId = PL.id;
-
-
 
 let settings: SettingSchemaDesc[] = [
   {
@@ -32,13 +29,19 @@ let settings: SettingSchemaDesc[] = [
     description: "Set your desired model to use ollama",
     default: "mistral:instruct"
   },
+  {
+    key: "shortcut",
+    type: "string",
+    title: "Shortcut",
+    description: "Shortcut to open plugin command pallete",
+    default: "mod+shift+o"
+  },
 ]
 
+
 function main() {
-  console.log("Hello")
   console.info(`#${pluginId}: MAIN`);
-  // logseq.useSettingsSchema(settings)
-  let loading = false
+  logseq.useSettingsSchema(settings)
   const root = ReactDOM.createRoot(document.getElementById("app")!);
 
   root.render(
@@ -47,13 +50,10 @@ function main() {
     </React.StrictMode>
   );
 
-  function show() {
-    logseq.showMainUI();
-  }
   function createModel() {
     return {
       show() {
-        logseq.showMainUI();
+        ollamaUI()
       },
     };
   }
@@ -83,7 +83,7 @@ function main() {
     template: `
       <a data-on-click="show"
          class="button">
-        <i class="ti ti-brand-reddit"></i>
+        <i class="ti ti-wand"></i>
       </a>
     `,
   });

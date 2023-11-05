@@ -1,3 +1,4 @@
+import path from "path"
 import reactPlugin from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import logseqDevPlugin from "vite-plugin-logseq";
@@ -6,8 +7,14 @@ import logseqDevPlugin from "vite-plugin-logseq";
 export default defineConfig({
   plugins: [logseqDevPlugin(), reactPlugin()],
   // Makes HMR available for development
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   build: {
     target: "esnext",
     minify: "esbuild",
   },
 });
+

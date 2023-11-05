@@ -1,28 +1,31 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { askAI, defineWord, DivideTaskIntoSubTasks } from '../ollama';
+import React, { KeyboardEventHandler, useEffect, useState } from 'react'
+import { askAI, askWithContext, defineWord } from '../ollama';
+import { Input } from '@/components/ui/input';
 
-export const PromptAI = ({ type }) => {
+export const PromptAI = ({ type, theme }: { type: string, theme: string }) => {
 
-  const placeholder = type === 'prompt' ? "Prompt..." : "Define..."
+  const placeholder = type === 'ask ai' ? "Prompt..." : "Define..."
   const [inputValue, setInputValue] = useState('');
   const [hitEnter, setHitEnter] = useState(false)
 
   useEffect(() => {
     if (hitEnter) {
-      if (type === 'prompt') {
+      if (type === 'ask ai') {
         askAI(inputValue)
-      } else {
+      } else if (type === 'define') {
         defineWord(inputValue)
+      } else if (type === 'ask with context') {
+        askWithContext(inputValue)
       }
     }
   }, [hitEnter])
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const query = e.target.value;
     setInputValue(query);
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (e) => {
     if (e.key === 'Enter') {
       setHitEnter(true)
     }
@@ -30,14 +33,14 @@ export const PromptAI = ({ type }) => {
   return (
     !hitEnter ? (
       <div className='w-screen text-center'>
-        <input
+        <Input
           autoFocus
           type="text"
           placeholder={placeholder}
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          className="bg-gray-700 text-white px-2 py-1 rounded-md dark:bg-gray-800 inline-block w-3/4"
+          className={(theme === 'dark' ? "dark text-white dark:bg-gray-800" : "text-black bg-gray-200") + "px-2 py-1 rounded-md inline-block w-3/4"}
         />
       </div>
     ) : null
