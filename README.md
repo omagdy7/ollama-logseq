@@ -18,7 +18,9 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
 
 
 # Demo
-![demo](./docs/demo.mkv)
+![demo](./docs/demo.gif)
+![summary](./docs/summary.gif)
+![context](./docs/context.gif)
 
 
 If you have any features suggestions feel free to open an issue
