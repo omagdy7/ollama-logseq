@@ -14,6 +14,9 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
   - Create a flash card
   - Divide a todo task into subtasks
 - Respects theming
+- Context menu commands(Make a flash card, Divide task into subtasks)
+- A slash command via /ollama
+- Button in tool bar
 - Settings for changing the host of the model, the model itself and a shortcut to open the plugin command pallete
 
 
