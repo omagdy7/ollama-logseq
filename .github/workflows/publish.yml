@@ -24,7 +24,7 @@ jobs:
         run: pnpm build
 
       - name: Create a release zip file
-        run: zip -r my-react-project.zip build/
+        run: zip -r ollama-logseq.zip dist/
 
       - name: Upload release artifact
         uses: actions/upload-artifact@v2
