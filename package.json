@@ -1,6 +1,6 @@
 {
   "name": "ollama-logseq",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "main": "dist/index.html",
   "scripts": {
     "dev": "vite",
@@ -46,6 +46,6 @@
   },
   "logseq": {
     "id": "ollama-logseq",
-    "icon": "./logo.svg"
+    "icon": "icon.png"
   }
 }
