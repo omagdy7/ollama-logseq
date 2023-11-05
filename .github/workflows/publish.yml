@@ -1,17 +1,24 @@
-name: Release
+name: Build plugin
+
 on:
-  workflow_dispatch:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - '*' # Push events to matching any tag format, i.e. 1.0, 20.15.10
+
+env:
+  PLUGIN_NAME: ollama-logseq
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
         with:
-          node-version: 18
+          node-version: '16' # You might need to adjust this value to your own version
 
       - uses: pnpm/action-setup@v2.2.1
         with:
@@ -23,11 +30,44 @@ jobs:
       - name: Build the project
         run: pnpm build
 
-      - name: Create a release zip file
-        run: zip -r ollama-logseq.zip dist/
-
-      - name: Upload release artifact
-        uses: actions/upload-artifact@v2
+      - name: Build
+        id: build
+        run: |
+          mkdir ${{ env.PLUGIN_NAME }}
+          cp README.md package.json icon.png ${{ env.PLUGIN_NAME }}
+          mv dist ${{ env.PLUGIN_NAME }}
+          zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
+          ls
+          echo "::set-output name=tag_name::$(git tag --sort version:refname | tail -n 1)"
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ github.ref }}
         with:
-          name: ollama-logseq
-          path: ollama-logseq.zip
+          allowUpdates: true
+          draft: false
+          prerelease: false
+
+      - name: Upload zip file
+        id: upload_zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.PLUGIN_NAME }}.zip
+          asset_name: ${{ env.PLUGIN_NAME }}-${{ steps.build.outputs.tag_name }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload package.json
+        id: upload_metadata
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./package.json
+          asset_name: package.json
+          asset_content_type: application/json
