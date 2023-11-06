@@ -74,6 +74,7 @@ async function promptLLM(prompt: string) {
   try {
     const response = await fetch(`http://${logseq.settings.host}/api/generate`, {
       method: 'POST',
+      mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json',
       },
