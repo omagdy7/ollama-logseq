@@ -63,7 +63,7 @@ function main() {
     zIndex: 11,
   });
 
-  const openIconName = "template-plugin-open";
+  const openIconName = "ollama-ui-open";
 
 
   logseq.provideStyle(css`
