@@ -17,18 +17,35 @@ export function OllamaCommandPallete({ options, theme }: { options: string[], th
     setIsEnterPressed(true);
     switch (selection) {
       case "divide into subtasks":
+        logseq.hideMainUI()
         DivideTaskIntoSubTasks()
         break;
       case "summarize":
+        logseq.hideMainUI()
         summarize()
         break;
       case "convert to flash card":
+        logseq.hideMainUI()
         convertToFlashCard()
         break;
       default:
         break;
     }
   }
+
+  useEffect(() => {
+    const handleEsc = (e: any) => {
+      if (e.key === 'Escape') {
+        logseq.hideMainUI()
+      }
+    };
+
+    window.addEventListener('keydown', handleEsc);
+
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, []);
 
   if (isEnterPressed && (selection !== 'ask ai' && selection !== 'define' && selection !== 'ask with context')) {
     return null

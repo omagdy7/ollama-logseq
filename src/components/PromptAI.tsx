@@ -10,6 +10,7 @@ export const PromptAI = ({ type, theme }: { type: string, theme: string }) => {
 
   useEffect(() => {
     if (hitEnter) {
+      logseq.hideMainUI()
       if (type === 'ask ai') {
         askAI(inputValue)
       } else if (type === 'define') {
