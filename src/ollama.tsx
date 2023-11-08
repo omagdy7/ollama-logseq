@@ -84,8 +84,8 @@ async function promptLLM(prompt: string) {
       }),
     })
     if (!response.ok) {
-      console.log("Error: couldn't fulful request")
-      logseq.App.showMsg("Couldn't fulfuil request make sure you don't have a typo in the name of the model or the host url")
+      console.log("Error: couldn't fulfill request")
+      logseq.App.showMsg("Couldn't fulfill request make sure you don't have a typo in the name of the model or the host url")
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
@@ -93,7 +93,7 @@ async function promptLLM(prompt: string) {
     return data.response;
   } catch (e: any) {
     console.error("ERROR: ", e)
-    logseq.App.showMsg("Couldn't fulfuil request make sure you don't have a typo in the name of the model or the host url")
+    logseq.App.showMsg("Couldn't fulfill request make sure you don't have a typo in the name of the model or the host url")
   }
 }
 
