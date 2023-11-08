@@ -1,3 +1,4 @@
+>If this plugin helps you, I'd really appreciate your support. You can [buy me a coffee here. ](https://www.buymeacoffee.com/omagdy)
 # 🦙 ollama-logseq plugin
 
 A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq](https://github.com/logseq/logseq)
@@ -5,6 +6,7 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
 # Get Started
 - First you will need to setup [ollama](https://github.com/jmorganca/ollama) you can check their github repo for instructions on how to setup ollama
 - That's it once you setup ollama you should be able to use the plugin with no problem
+
 
 # Features
 - The plugin currently has 5 commands
