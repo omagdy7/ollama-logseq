@@ -13,10 +13,11 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
   - Ask Ai -> which is a prompt the AI freely without any context
   - Ask Ai with context -> This is the same as Ask Ai but it gives the model the context of the current page
   - Summarize -> Summarizs the whole page
+  - Summarize Block
   - Create a flash card
   - Divide a todo task into subtasks
 - Respects theming
-- Context menu commands(Make a flash card, Divide task into subtasks)
+- Context menu commands(Summarize Block, Make a flash card, Divide task into subtasks)
 - A slash command via /ollama
 - Button in tool bar
 - Settings for changing the host of the model, the model itself and a shortcut to open the plugin command pallete
