@@ -144,6 +144,22 @@ export async function summarize() {
   }
 }
 
+export async function summarizeBlock() {
+  try {
+    const currentBlock = await logseq.Editor.getCurrentBlock()
+    if (currentBlock) {
+      let summaryBlock = await logseq.Editor.insertBlock(currentBlock.uuid, `⌛Summarizing Block...`, { before: true })
+      if (summaryBlock) {
+        const summary = await promptLLM(`Summarize the following ${currentBlock.content}`);
+        await logseq.Editor.updateBlock(summaryBlock.uuid, `Summary: ${summary}`)
+      }
+    }
+  } catch (e: any) {
+    logseq.App.showMsg(e.toString(), 'warning')
+    console.error(e)
+  }
+}
+
 export async function askAI(prompt: string) {
   await delay(300)
   try {
@@ -253,3 +269,5 @@ export async function DivideTaskIntoSubTasks() {
     console.error(e)
   }
 }
+
+

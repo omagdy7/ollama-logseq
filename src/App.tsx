@@ -10,6 +10,7 @@ const options = [
   'Define',
   'Divide into subtasks',
   'Summarize',
+  'Summarize Block',
   'Convert to flash card',
 ];
 
