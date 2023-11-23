@@ -133,7 +133,7 @@ export async function summarize() {
         blocksContent += block.content + "/n"
       }
       if (lastBlock) {
-        lastBlock = await logseq.Editor.insertBlock(lastBlock.uuid, '🚀 Summarizing....', { before: true })
+        lastBlock = await logseq.Editor.insertBlock(lastBlock.uuid, '⌛ Summarizing Page....', { before: true })
       }
       const summary = await promptLLM(`Summarize the following ${blocksContent}`)
       await logseq.Editor.updateBlock(lastBlock.uuid, `Summary: ${summary}`)
@@ -179,48 +179,53 @@ export async function askAI(prompt: string) {
   }
 }
 
-
-export async function convertToFlashCardFromEvent(b: IHookEvent) {
+export async function summarizeBlockFromEvent(b: IHookEvent) {
   try {
     const currentBlock = await logseq.Editor.getBlock(b.uuid)
-    if (!currentBlock) {
-      throw new Error("Block not found");
+    if (currentBlock) {
+      let summaryBlock = await logseq.Editor.insertBlock(currentBlock.uuid, `⌛Summarizing Block...`, { before: true })
+      if (summaryBlock) {
+        const summary = await promptLLM(`Summarize the following ${currentBlock.content}`);
+        await logseq.Editor.updateBlock(summaryBlock.uuid, `Summary: ${summary}`)
+      }
     }
-    const block = await logseq.Editor.insertBlock(currentBlock.uuid, 'Generating....', { before: false })
-    if (!block) {
-      throw new Error("Block not found");
-    }
-    const response = await promptLLM(`Create a flashcard for:\n ${currentBlock.content}`)
-    await logseq.Editor.updateBlock(block.uuid, `${response} #card`)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)
   }
 }
 
+export async function convertToFlashCardFromEvent(b: IHookEvent) {
+  const currentBlock = await logseq.Editor.getBlock(b.uuid)
+  if (!currentBlock) {
+    throw new Error("Block not found");
+  }
+  convertToFlashCard(currentBlock.uuid, currentBlock.content)
+}
 
-export async function convertToFlashCard() {
+export async function convertToFlashCardCurrentBlock() {
+  const currentBlock = await logseq.Editor.getCurrentBlock()
+  if (!currentBlock) {
+    throw new Error("Block not found");
+  }
+  convertToFlashCard(currentBlock.uuid, currentBlock.content)
+}
+
+
+export async function convertToFlashCard(uuid: string, blockContent: string) {
   try {
-    const currentBlock = await logseq.Editor.getCurrentBlock()
-    if (!currentBlock) {
+    const questionBlock = await logseq.Editor.insertBlock(uuid, "Genearting question....", { before: false })
+    if (!questionBlock) {
       throw new Error("Block not found");
     }
-    const block = await logseq.Editor.insertBlock(currentBlock.uuid, "Genearting todos....", { before: false })
-    if (!block) {
+    const answerBlock = await logseq.Editor.insertBlock(questionBlock.uuid, "Genearting answer....", { before: false })
+    if (!answerBlock) {
       throw new Error("Block not found");
     }
-    if (currentBlock) {
-      let i = 0;
-      const response = await promptLLM(`Divide this task into subtasks with numbers: ${currentBlock.content}`)
-      for (const todo of response.split("\n")) {
-        if (i == 0) {
-          await logseq.Editor.updateBlock(block.uuid, `TODO ${todo.slice(3)}`)
-        } else {
-          await logseq.Editor.insertBlock(currentBlock.uuid, `TODO ${todo.slice(3)}`, { before: false })
-        }
-        i++;
-      }
-    }
+    const question = await promptLLM(`Create a question about this that would fit in a flashcard :\n ${blockContent}`)
+    const answer = await promptLLM(`Given the question ${question} and the context of ${blockContent} What is the answer? be as brief as possible and provide the answer only.`)
+    await logseq.Editor.updateBlock(questionBlock.uuid, `${question} #card`)
+    await logseq.Editor.updateBlock(answerBlock.uuid, answer)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)

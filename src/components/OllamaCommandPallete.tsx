@@ -6,7 +6,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import { convertToFlashCard, DivideTaskIntoSubTasks, summarize, summarizeBlock } from "@/ollama";
+import { convertToFlashCard, convertToFlashCardCurrentBlock, DivideTaskIntoSubTasks, summarize, summarizeBlock } from "@/ollama";
 import { PromptAI } from "./PromptAI";
 
 export function OllamaCommandPallete({ options, theme }: { options: string[], theme: string }) {
@@ -30,7 +30,7 @@ export function OllamaCommandPallete({ options, theme }: { options: string[], th
         break;
       case "convert to flash card":
         logseq.hideMainUI()
-        convertToFlashCard()
+        convertToFlashCardCurrentBlock()
         break;
       default:
         break;
