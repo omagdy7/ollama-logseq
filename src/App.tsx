@@ -1,4 +1,3 @@
-import { AppUserInfo } from "@logseq/libs/dist/LSPlugin";
 import React, { useEffect, useRef, useState } from "react";
 import { OllamaCommandPallete } from "./components/OllamaCommandPallete";
 import { convertToFlashCardFromEvent, DivideTaskIntoSubTasksFromEvent, ollamaUI, summarizeBlockFromEvent } from "./ollama";

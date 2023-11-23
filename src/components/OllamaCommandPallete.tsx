@@ -1,4 +1,4 @@
-import React, { KeyboardEventHandler, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Command,
   CommandEmpty,
@@ -6,7 +6,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import { convertToFlashCard, convertToFlashCardCurrentBlock, DivideTaskIntoSubTasks, DivideTaskIntoSubTasksCurrentBlock, summarize, summarizeBlock } from "@/ollama";
+import { convertToFlashCardCurrentBlock, DivideTaskIntoSubTasksCurrentBlock, summarize, summarizeBlock } from "@/ollama";
 import { PromptAI } from "./PromptAI";
 
 export function OllamaCommandPallete({ options, theme }: { options: string[], theme: string }) {
