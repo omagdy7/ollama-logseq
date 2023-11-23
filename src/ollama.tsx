@@ -109,7 +109,7 @@ export async function askWithContext(prompt: string) {
     for (const block of currentBlocksTree) {
       blocksContent += await getTreeContent(block)
     }
-    askAI(prompt, `With the Context of : ${blocksContent}`)
+    askAI(prompt, `Context: ${blocksContent}`)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)
@@ -179,23 +179,6 @@ export async function summarizeBlockFromEvent(b: IHookEvent) {
   }
 }
 
-export async function convertToFlashCardFromEvent(b: IHookEvent) {
-  const currentBlock = await logseq.Editor.getBlock(b.uuid)
-  if (!currentBlock) {
-    throw new Error("Block not found");
-  }
-  await convertToFlashCard(currentBlock.uuid, currentBlock.content)
-}
-
-export async function convertToFlashCardCurrentBlock() {
-  const currentBlock = await logseq.Editor.getCurrentBlock()
-  if (!currentBlock) {
-    throw new Error("Block not found");
-  }
-  await convertToFlashCard(currentBlock.uuid, currentBlock.content)
-}
-
-
 export async function convertToFlashCard(uuid: string, blockContent: string) {
   try {
     const questionBlock = await logseq.Editor.insertBlock(uuid, "Genearting question....", { before: false })
@@ -211,47 +194,42 @@ export async function convertToFlashCard(uuid: string, blockContent: string) {
   }
 }
 
+export async function convertToFlashCardFromEvent(b: IHookEvent) {
+  const currentBlock = await logseq.Editor.getBlock(b.uuid)
+  await convertToFlashCard(currentBlock!.uuid, currentBlock!.content)
+}
+
+export async function convertToFlashCardCurrentBlock() {
+  const currentBlock = await logseq.Editor.getCurrentBlock()
+  await convertToFlashCard(currentBlock!.uuid, currentBlock!.content)
+}
+
+export async function DivideTaskIntoSubTasks(uuid: string, content: string) {
+  try {
+    const block = await logseq.Editor.insertBlock(uuid, "Genearting todos....", { before: false })
+    let i = 0;
+    const response = await promptLLM(`Divide this task into subtasks with numbers: ${content} `)
+    for (const todo of response.split("\n")) {
+      if (i == 0) {
+        await logseq.Editor.updateBlock(block!.uuid, `TODO ${todo.slice(3)} `)
+      } else {
+        await logseq.Editor.insertBlock(uuid, `TODO ${todo.slice(3)} `, { before: false })
+      }
+      i++;
+    }
+  } catch (e: any) {
+    logseq.App.showMsg(e.toString(), 'warning')
+    console.error(e)
+  }
+}
+
 export async function DivideTaskIntoSubTasksFromEvent(b: IHookEvent) {
-  try {
-    const currentBlock = await logseq.Editor.getBlock(b.uuid)
-    if (!currentBlock) {
-      throw new Error("Block not found");
-    }
-    const block = await logseq.Editor.insertBlock(currentBlock.uuid, "Genearting todos....", { before: false })
-    if (!block) {
-      throw new Error("Block not found");
-    }
-    if (currentBlock) {
-      let i = 0;
-      const response = await promptLLM(`Divide this task into subtasks with numbers: ${currentBlock.content} `)
-      for (const todo of response.split("\n")) {
-        if (i == 0) {
-          await logseq.Editor.updateBlock(block.uuid, `TODO ${todo.slice(3)} `)
-        } else {
-          await logseq.Editor.insertBlock(currentBlock.uuid, `TODO ${todo.slice(3)} `, { before: false })
-        }
-        i++;
-      }
-    }
-  } catch (e: any) {
-    logseq.App.showMsg(e.toString(), 'warning')
-    console.error(e)
-  }
+  const currentBlock = await logseq.Editor.getBlock(b.uuid)
+  DivideTaskIntoSubTasks(currentBlock!.uuid, currentBlock!.content)
 }
 
-export async function DivideTaskIntoSubTasks() {
-  try {
-    const currentBlock = await logseq.Editor.getCurrentBlock()
-    if (currentBlock) {
-      const response = await promptLLM(`Divide this task into subtasks with numbers: ${currentBlock.content} `)
-      for (const todo of response.split("\n")) {
-        await logseq.Editor.insertBlock(currentBlock.uuid, `TODO ${todo.slice(3)} `, { before: false })
-      }
-    }
-  } catch (e: any) {
-    logseq.App.showMsg(e.toString(), 'warning')
-    console.error(e)
-  }
+export async function DivideTaskIntoSubTasksCurrentBlock() {
+  const currentBlock = await logseq.Editor.getCurrentBlock()
+  DivideTaskIntoSubTasks(currentBlock!.uuid, currentBlock!.content)
 }
-
 

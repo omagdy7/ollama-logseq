@@ -6,7 +6,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import { convertToFlashCard, convertToFlashCardCurrentBlock, DivideTaskIntoSubTasks, summarize, summarizeBlock } from "@/ollama";
+import { convertToFlashCard, convertToFlashCardCurrentBlock, DivideTaskIntoSubTasks, DivideTaskIntoSubTasksCurrentBlock, summarize, summarizeBlock } from "@/ollama";
 import { PromptAI } from "./PromptAI";
 
 export function OllamaCommandPallete({ options, theme }: { options: string[], theme: string }) {
@@ -18,7 +18,7 @@ export function OllamaCommandPallete({ options, theme }: { options: string[], th
     switch (selection) {
       case "divide into subtasks":
         logseq.hideMainUI()
-        DivideTaskIntoSubTasks()
+        DivideTaskIntoSubTasksCurrentBlock()
         break;
       case "summarize":
         logseq.hideMainUI()

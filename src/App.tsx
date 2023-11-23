@@ -43,7 +43,7 @@ function App() {
     logseq.Editor.registerSlashCommand("ollama", ollamaUI)
     logseq.Editor.registerBlockContextMenuItem("Create a flash card", convertToFlashCardFromEvent)
     logseq.Editor.registerBlockContextMenuItem("Summarize block", summarizeBlockFromEvent)
-    logseq.Editor.registerBlockContextMenuItem("Make task into subtasks", DivideTaskIntoSubTasksFromEvent)
+    logseq.Editor.registerBlockContextMenuItem("Divide into subtasks", DivideTaskIntoSubTasksFromEvent)
     logseq.App.registerCommandShortcut(
       { "binding": logseq.settings.shortcut },
       ollamaUI
