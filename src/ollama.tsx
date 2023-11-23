@@ -103,8 +103,6 @@ export async function defineWord(word: string) {
 
 
 export async function askWithContext(prompt: string) {
-  await delay(300)
-
   try {
     const currentBlocksTree = await logseq.Editor.getCurrentPageBlocksTree()
     const currentBlock = currentBlocksTree[0]
@@ -225,6 +223,7 @@ export async function convertToFlashCard(uuid: string, blockContent: string) {
     const question = await promptLLM(`Create a question about this that would fit in a flashcard :\n ${blockContent}`)
     const answer = await promptLLM(`Given the question ${question} and the context of ${blockContent} What is the answer? be as brief as possible and provide the answer only.`)
     await logseq.Editor.updateBlock(questionBlock.uuid, `${question} #card`)
+    await delay(300)
     await logseq.Editor.updateBlock(answerBlock.uuid, answer)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
