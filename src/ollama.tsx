@@ -98,7 +98,7 @@ async function promptLLM(prompt: string) {
 }
 
 export async function defineWord(word: string) {
-  askAI(`What's the formal defintion of ${word}`)
+  askAI(`What's the defintion of ${word}`, "")
 }
 
 
@@ -113,7 +113,7 @@ export async function askWithContext(prompt: string) {
     for (const block of currentBlocksTree) {
       blocksContent += await getTreeContent(block)
     }
-    askAI(`With the Context of : ${blocksContent}, ${prompt}`)
+    askAI(prompt, `With the Context of : ${blocksContent}`)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)
@@ -158,17 +158,19 @@ export async function summarizeBlock() {
   }
 }
 
-export async function askAI(prompt: string) {
+export async function askAI(prompt: string, context: string) {
   await delay(300)
   try {
-    const currentSelectedBlocks = await logseq.Editor.getCurrentPageBlocksTree()
-    if (currentSelectedBlocks) {
-      let lastBlock: any = currentSelectedBlocks[currentSelectedBlocks.length - 1]
-      if (lastBlock) {
-        lastBlock = await logseq.Editor.insertBlock(lastBlock.uuid, 'Generating....', { before: true })
+    const currentBlock = await logseq.Editor.getCurrentBlock()
+    if (currentBlock) {
+      const block = await logseq.Editor.insertBlock(currentBlock.uuid, 'Generating....', { before: true })
+      let response = "";
+      if (context == "") {
+        response = await promptLLM(prompt)
+      } else {
+        response = await promptLLM(`With the context of: ${context}, ${prompt}`)
       }
-      const response = await promptLLM(prompt)
-      await logseq.Editor.updateBlock(lastBlock.uuid, response)
+      await logseq.Editor.updateBlock(block!.uuid, `${prompt}\n${response}`)
     }
 
   } catch (e: any) {
@@ -198,7 +200,7 @@ export async function convertToFlashCardFromEvent(b: IHookEvent) {
   if (!currentBlock) {
     throw new Error("Block not found");
   }
-  convertToFlashCard(currentBlock.uuid, currentBlock.content)
+  await convertToFlashCard(currentBlock.uuid, currentBlock.content)
 }
 
 export async function convertToFlashCardCurrentBlock() {
@@ -206,7 +208,7 @@ export async function convertToFlashCardCurrentBlock() {
   if (!currentBlock) {
     throw new Error("Block not found");
   }
-  convertToFlashCard(currentBlock.uuid, currentBlock.content)
+  await convertToFlashCard(currentBlock.uuid, currentBlock.content)
 }
 
 
@@ -220,7 +222,7 @@ export async function convertToFlashCard(uuid: string, blockContent: string) {
     if (!answerBlock) {
       throw new Error("Block not found");
     }
-    const question = await promptLLM(`Create a question about this that would fit in a flashcard :\n ${blockContent}`)
+    const question = await promptLLM(`Create a question about this that would fit in a flashcard:\n ${blockContent}`)
     const answer = await promptLLM(`Given the question ${question} and the context of ${blockContent} What is the answer? be as brief as possible and provide the answer only.`)
     await logseq.Editor.updateBlock(questionBlock.uuid, `${question} #card`)
     await delay(300)
@@ -243,12 +245,12 @@ export async function DivideTaskIntoSubTasksFromEvent(b: IHookEvent) {
     }
     if (currentBlock) {
       let i = 0;
-      const response = await promptLLM(`Divide this task into subtasks with numbers: ${currentBlock.content}`)
+      const response = await promptLLM(`Divide this task into subtasks with numbers: ${currentBlock.content} `)
       for (const todo of response.split("\n")) {
         if (i == 0) {
-          await logseq.Editor.updateBlock(block.uuid, `TODO ${todo.slice(3)}`)
+          await logseq.Editor.updateBlock(block.uuid, `TODO ${todo.slice(3)} `)
         } else {
-          await logseq.Editor.insertBlock(currentBlock.uuid, `TODO ${todo.slice(3)}`, { before: false })
+          await logseq.Editor.insertBlock(currentBlock.uuid, `TODO ${todo.slice(3)} `, { before: false })
         }
         i++;
       }
@@ -263,9 +265,9 @@ export async function DivideTaskIntoSubTasks() {
   try {
     const currentBlock = await logseq.Editor.getCurrentBlock()
     if (currentBlock) {
-      const response = await promptLLM(`Divide this task into subtasks with numbers: ${currentBlock.content}`)
+      const response = await promptLLM(`Divide this task into subtasks with numbers: ${currentBlock.content} `)
       for (const todo of response.split("\n")) {
-        await logseq.Editor.insertBlock(currentBlock.uuid, `TODO ${todo.slice(3)}`, { before: false })
+        await logseq.Editor.insertBlock(currentBlock.uuid, `TODO ${todo.slice(3)} `, { before: false })
       }
     }
   } catch (e: any) {

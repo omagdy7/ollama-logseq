@@ -12,7 +12,7 @@ export const PromptAI = ({ type, theme }: { type: string, theme: string }) => {
     if (hitEnter) {
       logseq.hideMainUI()
       if (type === 'ask ai') {
-        askAI(inputValue)
+        askAI(inputValue, "")
       } else if (type === 'define') {
         defineWord(inputValue)
       } else if (type === 'ask with context') {
