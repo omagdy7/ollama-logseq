@@ -105,10 +105,6 @@ export async function defineWord(word: string) {
 export async function askWithContext(prompt: string) {
   try {
     const currentBlocksTree = await logseq.Editor.getCurrentPageBlocksTree()
-    const currentBlock = currentBlocksTree[0]
-    if (!currentBlock) {
-      throw new Error("Block not found");
-    }
     let blocksContent = ""
     for (const block of currentBlocksTree) {
       blocksContent += await getTreeContent(block)
@@ -130,9 +126,7 @@ export async function summarize() {
       for (const block of currentSelectedBlocks) {
         blocksContent += block.content + "/n"
       }
-      if (lastBlock) {
-        lastBlock = await logseq.Editor.insertBlock(lastBlock.uuid, '⌛ Summarizing Page....', { before: true })
-      }
+      lastBlock = await logseq.Editor.insertBlock(lastBlock.uuid, '⌛ Summarizing Page....', { before: true })
       const summary = await promptLLM(`Summarize the following ${blocksContent}`)
       await logseq.Editor.updateBlock(lastBlock.uuid, `Summary: ${summary}`)
     }
@@ -144,14 +138,11 @@ export async function summarize() {
 
 export async function summarizeBlock() {
   try {
+    // TODO: Get contnet of current block and subblocks
     const currentBlock = await logseq.Editor.getCurrentBlock()
-    if (currentBlock) {
-      let summaryBlock = await logseq.Editor.insertBlock(currentBlock.uuid, `⌛Summarizing Block...`, { before: true })
-      if (summaryBlock) {
-        const summary = await promptLLM(`Summarize the following ${currentBlock.content}`);
-        await logseq.Editor.updateBlock(summaryBlock.uuid, `Summary: ${summary}`)
-      }
-    }
+    let summaryBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, `⌛Summarizing Block...`, { before: false })
+    const summary = await promptLLM(`Summarize the following ${currentBlock!.content}`);
+    await logseq.Editor.updateBlock(summaryBlock!.uuid, `Summary: ${summary}`)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)
@@ -162,17 +153,14 @@ export async function askAI(prompt: string, context: string) {
   await delay(300)
   try {
     const currentBlock = await logseq.Editor.getCurrentBlock()
-    if (currentBlock) {
-      const block = await logseq.Editor.insertBlock(currentBlock.uuid, 'Generating....', { before: true })
-      let response = "";
-      if (context == "") {
-        response = await promptLLM(prompt)
-      } else {
-        response = await promptLLM(`With the context of: ${context}, ${prompt}`)
-      }
-      await logseq.Editor.updateBlock(block!.uuid, `${prompt}\n${response}`)
+    const block = await logseq.Editor.insertBlock(currentBlock!.uuid, 'Generating....', { before: true })
+    let response = "";
+    if (context == "") {
+      response = await promptLLM(prompt)
+    } else {
+      response = await promptLLM(`With the context of: ${context}, ${prompt}`)
     }
-
+    await logseq.Editor.updateBlock(block!.uuid, `${prompt}\n${response}`)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)
@@ -182,13 +170,9 @@ export async function askAI(prompt: string, context: string) {
 export async function summarizeBlockFromEvent(b: IHookEvent) {
   try {
     const currentBlock = await logseq.Editor.getBlock(b.uuid)
-    if (currentBlock) {
-      let summaryBlock = await logseq.Editor.insertBlock(currentBlock.uuid, `⌛Summarizing Block...`, { before: true })
-      if (summaryBlock) {
-        const summary = await promptLLM(`Summarize the following ${currentBlock.content}`);
-        await logseq.Editor.updateBlock(summaryBlock.uuid, `Summary: ${summary}`)
-      }
-    }
+    let summaryBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, `⌛Summarizing Block...`, { before: true })
+    const summary = await promptLLM(`Summarize the following ${currentBlock!.content}`);
+    await logseq.Editor.updateBlock(summaryBlock!.uuid, `Summary: ${summary}`)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)
@@ -215,18 +199,12 @@ export async function convertToFlashCardCurrentBlock() {
 export async function convertToFlashCard(uuid: string, blockContent: string) {
   try {
     const questionBlock = await logseq.Editor.insertBlock(uuid, "Genearting question....", { before: false })
-    if (!questionBlock) {
-      throw new Error("Block not found");
-    }
-    const answerBlock = await logseq.Editor.insertBlock(questionBlock.uuid, "Genearting answer....", { before: false })
-    if (!answerBlock) {
-      throw new Error("Block not found");
-    }
+    const answerBlock = await logseq.Editor.insertBlock(questionBlock!.uuid, "Genearting answer....", { before: false })
     const question = await promptLLM(`Create a question about this that would fit in a flashcard:\n ${blockContent}`)
     const answer = await promptLLM(`Given the question ${question} and the context of ${blockContent} What is the answer? be as brief as possible and provide the answer only.`)
-    await logseq.Editor.updateBlock(questionBlock.uuid, `${question} #card`)
+    await logseq.Editor.updateBlock(questionBlock!.uuid, `${question} #card`)
     await delay(300)
-    await logseq.Editor.updateBlock(answerBlock.uuid, answer)
+    await logseq.Editor.updateBlock(answerBlock!.uuid, answer)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)
