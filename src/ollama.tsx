@@ -152,11 +152,22 @@ export async function summarizeBlock() {
 export async function promptFromBlockEvent(b: IHookEvent) {
   try {
     const currentBlock = await logseq.Editor.getBlock(b.uuid)
-    const answerBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, 'Generating....', { before: false })
-    let response = "";
-    const prompt = await promptLLM(`${currentBlock!.content}`);
-    await logseq.Editor.updateBlock(answerBlock!.uuid, `${prompt}`)
+    const answerBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, '⌛Generating ...', { before: false })
+    const response = await promptLLM(`${currentBlock!.content}`);
+    await logseq.Editor.updateBlock(answerBlock!.uuid, `${response}`)
   } catch (e: any) {
+    logseq.UI.showMsg(e.toString(), 'warning')
+    console.error(e)
+  }
+}
+
+export async function expandBlockEvent(b: IHookEvent) {
+  try {
+    const currentBlock = await logseq.Editor.getBlock(b.uuid)
+    const answerBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, '⌛Generating ...', { before: false })
+    const response = await promptLLM(`Expand: ${currentBlock!.content}`);
+    await logseq.Editor.updateBlock(answerBlock!.uuid, `${response}`)
+  } catch(e: any) {
     logseq.UI.showMsg(e.toString(), 'warning')
     console.error(e)
   }
