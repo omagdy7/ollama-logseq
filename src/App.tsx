@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { OllamaCommandPallete } from "./components/OllamaCommandPallete";
-import { convertToFlashCardFromEvent, DivideTaskIntoSubTasksFromEvent, ollamaUI, summarizeBlockFromEvent } from "./ollama";
+import {  convertToFlashCardFromEvent, 
+          DivideTaskIntoSubTasksFromEvent, 
+          ollamaUI, 
+          summarizeBlockFromEvent, 
+          promptFromBlockEvent,
+          expandBlockEvent } from "./ollama";
 import { useAppVisible } from "./utils";
 
 const options = [
@@ -43,6 +48,8 @@ function App() {
     logseq.Editor.registerBlockContextMenuItem("Create a flash card", convertToFlashCardFromEvent)
     logseq.Editor.registerBlockContextMenuItem("Summarize block", summarizeBlockFromEvent)
     logseq.Editor.registerBlockContextMenuItem("Divide into subtasks", DivideTaskIntoSubTasksFromEvent)
+    logseq.Editor.registerBlockContextMenuItem("Ollama: Prompt from Block", promptFromBlockEvent)
+    logseq.Editor.registerBlockContextMenuItem("Ollama: Expand Block", expandBlockEvent)
     logseq.App.registerCommandShortcut(
       { "binding": logseq.settings.shortcut },
       ollamaUI
