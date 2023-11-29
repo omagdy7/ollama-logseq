@@ -1,4 +1,3 @@
->If this plugin helps you, I'd really appreciate your support. You can [buy me a coffee here. ](https://www.buymeacoffee.com/omagdy)
 # 🦙 ollama-logseq plugin
 
 A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq](https://github.com/logseq/logseq)
@@ -18,10 +17,15 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
   - Create a flash card
   - Divide a todo task into subtasks
 - Respects theming
-- Context menu commands(Summarize Block, Make a flash card, Divide task into subtasks)
+- Context menu commands
+  - Summarize Block
+  - Make a flash card
+  - Divide task into subtasks
+  - Prompt from block
+  - Expand block
 - A slash command via /ollama
 - Button in tool bar
-- Settings for changing the host of the model, the model itself and a shortcut to open the plugin command pallete
+- Settings for changing the host of the model, the model itself and a shortcut to open the plugin command palette
 
 
 # Demo
@@ -30,5 +34,7 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
 ![context](./docs/context.gif)
 
 
+# Contribution
 If you have any features suggestions feel free to open an issue
 
+>If this plugin helps you, I'd really appreciate your support. You can [buy me a coffee here. ](https://www.buymeacoffee.com/omagdy)

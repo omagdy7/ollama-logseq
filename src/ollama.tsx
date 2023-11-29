@@ -85,7 +85,7 @@ async function promptLLM(prompt: string) {
     })
     if (!response.ok) {
       console.log("Error: couldn't fulfill request")
-      logseq.App.showMsg("Couldn't fulfill request make sure you don't have a typo in the name of the model or the host url")
+      logseq.App.showMsg("Coudln't fulfull request make sure that ollama service is running and make sure there is no typo in host or model name")
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
@@ -93,7 +93,7 @@ async function promptLLM(prompt: string) {
     return data.response;
   } catch (e: any) {
     console.error("ERROR: ", e)
-    logseq.App.showMsg("Couldn't fulfill request make sure you don't have a typo in the name of the model or the host url")
+    logseq.App.showMsg("Coudln't fulfull request make sure that ollama service is running and make sure there is no typo in host or model name")
   }
 }
 
@@ -167,7 +167,7 @@ export async function expandBlockEvent(b: IHookEvent) {
     const answerBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, '⌛Generating ...', { before: false })
     const response = await promptLLM(`Expand: ${currentBlock!.content}`);
     await logseq.Editor.updateBlock(answerBlock!.uuid, `${response}`)
-  } catch(e: any) {
+  } catch (e: any) {
     logseq.UI.showMsg(e.toString(), 'warning')
     console.error(e)
   }
@@ -177,7 +177,7 @@ export async function askAI(prompt: string, context: string) {
   await delay(300)
   try {
     const currentBlock = await logseq.Editor.getCurrentBlock()
-    const block = await logseq.Editor.insertBlock(currentBlock!.uuid, 'Generating....', { before: true })
+    const block = await logseq.Editor.insertBlock(currentBlock!.uuid, '⌛Generating....', { before: true })
     let response = "";
     if (context == "") {
       response = await promptLLM(prompt)
@@ -205,8 +205,8 @@ export async function summarizeBlockFromEvent(b: IHookEvent) {
 
 export async function convertToFlashCard(uuid: string, blockContent: string) {
   try {
-    const questionBlock = await logseq.Editor.insertBlock(uuid, "Genearting question....", { before: false })
-    const answerBlock = await logseq.Editor.insertBlock(questionBlock!.uuid, "Genearting answer....", { before: false })
+    const questionBlock = await logseq.Editor.insertBlock(uuid, "⌛Genearting question....", { before: false })
+    const answerBlock = await logseq.Editor.insertBlock(questionBlock!.uuid, "⌛Genearting answer....", { before: false })
     const question = await promptLLM(`Create a question about this that would fit in a flashcard:\n ${blockContent}`)
     const answer = await promptLLM(`Given the question ${question} and the context of ${blockContent} What is the answer? be as brief as possible and provide the answer only.`)
     await logseq.Editor.updateBlock(questionBlock!.uuid, `${question} #card`)
@@ -230,7 +230,7 @@ export async function convertToFlashCardCurrentBlock() {
 
 export async function DivideTaskIntoSubTasks(uuid: string, content: string) {
   try {
-    const block = await logseq.Editor.insertBlock(uuid, "Genearting todos....", { before: false })
+    const block = await logseq.Editor.insertBlock(uuid, "✅ Genearting todos ...", { before: false })
     let i = 0;
     const response = await promptLLM(`Divide this task into subtasks with numbers: ${content} `)
     for (const todo of response.split("\n")) {

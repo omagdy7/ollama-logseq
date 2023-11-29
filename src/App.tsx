@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { OllamaCommandPallete } from "./components/OllamaCommandPallete";
-import {  convertToFlashCardFromEvent, 
-          DivideTaskIntoSubTasksFromEvent, 
-          ollamaUI, 
-          summarizeBlockFromEvent, 
-          promptFromBlockEvent,
-          expandBlockEvent } from "./ollama";
+import {
+  convertToFlashCardFromEvent,
+  DivideTaskIntoSubTasksFromEvent,
+  ollamaUI,
+  summarizeBlockFromEvent,
+  promptFromBlockEvent,
+  expandBlockEvent
+} from "./ollama";
 import { useAppVisible } from "./utils";
 
 const options = [
@@ -45,9 +47,9 @@ function App() {
       return
     }
     logseq.Editor.registerSlashCommand("ollama", ollamaUI)
-    logseq.Editor.registerBlockContextMenuItem("Create a flash card", convertToFlashCardFromEvent)
-    logseq.Editor.registerBlockContextMenuItem("Summarize block", summarizeBlockFromEvent)
-    logseq.Editor.registerBlockContextMenuItem("Divide into subtasks", DivideTaskIntoSubTasksFromEvent)
+    logseq.Editor.registerBlockContextMenuItem("Ollama: Create a flash card", convertToFlashCardFromEvent)
+    logseq.Editor.registerBlockContextMenuItem("Ollama: Summarize block", summarizeBlockFromEvent)
+    logseq.Editor.registerBlockContextMenuItem("Ollama: Divide into subtasks", DivideTaskIntoSubTasksFromEvent)
     logseq.Editor.registerBlockContextMenuItem("Ollama: Prompt from Block", promptFromBlockEvent)
     logseq.Editor.registerBlockContextMenuItem("Ollama: Expand Block", expandBlockEvent)
     logseq.App.registerCommandShortcut(
