@@ -101,10 +101,8 @@ async function ollamaGenerate(prompt: string, parameters?: OllamaGenerateParamet
       throw new Error("Error in Ollama request: " + response.statusText)
     }
     const data = await response.json()
-
-    console.log(data)
     
-    return data.response
+    return data
   } catch (e: any) {
     console.log(e)
     logseq.UI.showMsg("Error in Ollama request")
@@ -212,9 +210,14 @@ export async function promptFromBlockEvent(b: IHookEvent) {
     const answerBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, '🦙Generating ...', { before: false })
     const params = await getOllamaParametersFromBlockProperties(currentBlock!)
     const prompt = currentBlock!.content.replace(/^.*::.*$/gm, '') // nasty hack to remove properties from block content
-    const response = await ollamaGenerate(prompt, params);
+    const result = await ollamaGenerate(prompt, params);
     
-    await logseq.Editor.updateBlock(answerBlock!.uuid, `${response}`)
+    console.log(result)
+
+    if (params.usecontext) {
+      await logseq.Editor.upsertBlockProperty(currentBlock!.uuid, 'ollama-generate-context', result.context)
+    }
+    await logseq.Editor.updateBlock(answerBlock!.uuid, `${result.response}`)
   } catch (e: any) {
     logseq.UI.showMsg(e.toString(), 'warning')
     console.error(e)
