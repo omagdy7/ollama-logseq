@@ -73,7 +73,6 @@ type OllamaGenerateParameters = {
 }
 
 async function ollamaGenerate(prompt: string, parameters?: OllamaGenerateParameters) {
-  
   if (!logseq.settings) {
     throw new Error("Couldn't find ollama-logseq settings")
   }
@@ -85,8 +84,6 @@ async function ollamaGenerate(prompt: string, parameters?: OllamaGenerateParamet
   params.prompt = prompt
   params.stream = false
 
-  console.log(params)
-
   try {
     const response = await fetch(`http://${logseq.settings.host}/api/generate`, {
       method: 'POST',
@@ -96,18 +93,15 @@ async function ollamaGenerate(prompt: string, parameters?: OllamaGenerateParamet
       body: JSON.stringify(params)
     })
     if (!response.ok) {
-      console.log("Error in Ollama request: " + response.statusText)
-      logseq.UI.showMsg("Error in Ollama request")
+      logseq.UI.showMsg("Coudln't fulfull request make sure that ollama service is running and make sure there is no typo in host or model name")
       throw new Error("Error in Ollama request: " + response.statusText)
     }
     const data = await response.json()
-
-    console.log(data)
-    
     return data.response
+
   } catch (e: any) {
-    console.log(e)
-    logseq.UI.showMsg("Error in Ollama request")
+    console.error("ERROR: ", e)
+    logseq.App.showMsg("Coudln't fulfull request make sure that ollama service is running and make sure there is no typo in host or model name")
   }
 }
 
@@ -128,9 +122,8 @@ async function promptLLM(prompt: string) {
       }),
     })
     if (!response.ok) {
-      console.log("Error: couldn't fulfill request")
       logseq.App.showMsg("Coudln't fulfull request make sure that ollama service is running and make sure there is no typo in host or model name")
-      throw new Error('Network response was not ok');
+      throw new Error("Error in Ollama request: " + response.statusText)
     }
     const data = await response.json();
 
@@ -213,7 +206,7 @@ export async function promptFromBlockEvent(b: IHookEvent) {
     const params = await getOllamaParametersFromBlockProperties(currentBlock!)
     const prompt = currentBlock!.content.replace(/^.*::.*$/gm, '') // nasty hack to remove properties from block content
     const response = await ollamaGenerate(prompt, params);
-    
+
     await logseq.Editor.updateBlock(answerBlock!.uuid, `${response}`)
   } catch (e: any) {
     logseq.UI.showMsg(e.toString(), 'warning')

@@ -9,13 +9,14 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
 > Note: If you are on windows make sure to open WSL in the background for the model to work properly
 
 # Features
-- The plugin currently has 5 commands
+- The plugin currently has 6 commands
   - Ask Ai -> which is a prompt the AI freely without any context
   - Ask Ai with context -> This is the same as Ask Ai but it gives the model the context of the current page
   - Summarize -> Summarizs the whole page
   - Summarize Block
   - Create a flash card
   - Divide a todo task into subtasks
+- Get model from block properties
 - Respects theming
 - Context menu commands
   - Summarize Block
