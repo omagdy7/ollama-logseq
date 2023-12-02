@@ -67,6 +67,50 @@ export async function getPageContentFromBlock(b: BlockEntity): Promise<string> {
   return blockContents.join(" ");
 }
 
+type OllamaGenerateParameters = {
+  model?: string;
+  [key: string]: any;
+}
+
+async function ollamaGenerate(prompt: string, parameters?: OllamaGenerateParameters) {
+  
+  if (!logseq.settings) {
+    throw new Error("Couldn't find ollama-logseq settings")
+  }
+
+  let params = parameters || {};
+  if (params.model === undefined) {
+    params.model = logseq.settings.model;
+  }
+  params.prompt = prompt
+  params.stream = false
+
+  console.log(params)
+
+  try {
+    const response = await fetch(`http://${logseq.settings.host}/api/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params)
+    })
+    if (!response.ok) {
+      console.log("Error in Ollama request: " + response.statusText)
+      logseq.UI.showMsg("Error in Ollama request")
+      throw new Error("Error in Ollama request: " + response.statusText)
+    }
+    const data = await response.json()
+
+    console.log(data)
+    
+    return data.response
+  } catch (e: any) {
+    console.log(e)
+    logseq.UI.showMsg("Error in Ollama request")
+  }
+}
+
 async function promptLLM(prompt: string) {
   if (!logseq.settings) {
     throw new Error("Couldn't find logseq settings");
@@ -149,11 +193,27 @@ export async function summarizeBlock() {
   }
 }
 
+async function getOllamaParametersFromBlockProperties(b: BlockEntity) {
+  const properties = await logseq.Editor.getBlockProperties(b.uuid);
+  const ollamaParameters: OllamaGenerateParameters = {}
+  const prefix = 'ollamaGenerate'
+  for (const property in properties) {
+    if (property.startsWith(prefix)) {
+      const key = property.replace(prefix, '').toLowerCase()
+      ollamaParameters[key] = properties[property]
+    }
+  }
+  return ollamaParameters
+}
+
 export async function promptFromBlockEvent(b: IHookEvent) {
   try {
     const currentBlock = await logseq.Editor.getBlock(b.uuid)
-    const answerBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, '⌛Generating ...', { before: false })
-    const response = await promptLLM(`${currentBlock!.content}`);
+    const answerBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, '🦙Generating ...', { before: false })
+    const params = await getOllamaParametersFromBlockProperties(currentBlock!)
+    const prompt = currentBlock!.content.replace(/^.*::.*$/gm, '') // nasty hack to remove properties from block content
+    const response = await ollamaGenerate(prompt, params);
+    
     await logseq.Editor.updateBlock(answerBlock!.uuid, `${response}`)
   } catch (e: any) {
     logseq.UI.showMsg(e.toString(), 'warning')
