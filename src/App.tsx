@@ -4,9 +4,7 @@ import {
   convertToFlashCardFromEvent,
   DivideTaskIntoSubTasksFromEvent,
   ollamaUI,
-  summarizeBlockFromEvent,
-  promptFromBlockEvent,
-  expandBlockEvent
+  promptFromBlockEventClosure
 } from "./ollama";
 import { useAppVisible } from "./utils";
 
@@ -48,10 +46,13 @@ function App() {
     }
     logseq.Editor.registerSlashCommand("ollama", ollamaUI)
     logseq.Editor.registerBlockContextMenuItem("Ollama: Create a flash card", convertToFlashCardFromEvent)
-    logseq.Editor.registerBlockContextMenuItem("Ollama: Summarize block", summarizeBlockFromEvent)
     logseq.Editor.registerBlockContextMenuItem("Ollama: Divide into subtasks", DivideTaskIntoSubTasksFromEvent)
-    logseq.Editor.registerBlockContextMenuItem("Ollama: Prompt from Block", promptFromBlockEvent)
-    logseq.Editor.registerBlockContextMenuItem("Ollama: Expand Block", expandBlockEvent)
+    logseq.Editor.registerBlockContextMenuItem("Ollama: Prompt from Block", promptFromBlockEventClosure())
+    logseq.Editor.registerBlockContextMenuItem("Ollama: Summarize block", promptFromBlockEventClosure("Summarize: "))
+    logseq.Editor.registerBlockContextMenuItem("Ollama: 总结 Block", promptFromBlockEventClosure("总结: "))
+    logseq.Editor.registerBlockContextMenuItem("Ollama: Expand Block", promptFromBlockEventClosure("Expand: "))
+    logseq.Editor.registerBlockContextMenuItem("Ollama: 扩展 Block", promptFromBlockEventClosure("扩展: "))
+
     logseq.App.registerCommandShortcut(
       { "binding": logseq.settings.shortcut },
       ollamaUI
