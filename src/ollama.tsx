@@ -198,15 +198,26 @@ async function getOllamaParametersFromBlockProperties(b: BlockEntity) {
   return ollamaParameters
 }
 
-export async function promptFromBlockEvent(b: IHookEvent) {
+export async function promptFromBlockEvent(event: IHookEvent) {
   try {
-    const currentBlock = await logseq.Editor.getBlock(b.uuid)
+    const currentBlock = await logseq.Editor.getBlock(event.uuid)
     const answerBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, '🦙Generating ...', { before: false })
-    const params = await getOllamaParametersFromBlockProperties(currentBlock!)
+    let p_params: OllamaGenerateParameters = {}
+
+    if (currentBlock?.parent) {
+      let parentBlock = await logseq.Editor.getBlock(currentBlock.parent.id)
+      if (parentBlock) 
+        p_params = await getOllamaParametersFromBlockProperties(parentBlock)
+    }
+    const c_params = await getOllamaParametersFromBlockProperties(currentBlock!)
+    const params = { ...p_params, ...c_params }
+
+    console.log("params", params)
+
     const prompt = currentBlock!.content.replace(/^.*::.*$/gm, '') // nasty hack to remove properties from block content
     const result = await ollamaGenerate(prompt, params);
     
-    console.log(result)
+    console.log("result", result)
 
     if (params.usecontext) {
       await logseq.Editor.upsertBlockProperty(currentBlock!.uuid, 'ollama-generate-context', result.context)
