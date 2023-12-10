@@ -44,19 +44,33 @@ function App() {
     if (!logseq.settings) {
       return
     }
+
+logseq.Editor.getPageBlocksTree("ollama-logseq-config").then((blocks) => {
+  blocks!.forEach((block) => {
+    logseq.Editor.getBlockProperty(block.uuid, "ollama-context-menu-title").then((title) => {
+      logseq.Editor.getBlockProperty(block.uuid, "ollama-prompt-prefix").then((prompt_prefix) => {
+        logseq.Editor.registerBlockContextMenuItem(title, promptFromBlockEventClosure(prompt_prefix))
+      })
+    }).catch((reason) => {
+    })
+  })
+}).catch((reason) => {
+  console.log("Can not find the configuration page named 'ollama-logseq-config'")
+  console.log(reason)
+})
+    
+
     logseq.Editor.registerSlashCommand("ollama", ollamaUI)
     logseq.Editor.registerBlockContextMenuItem("Ollama: Create a flash card", convertToFlashCardFromEvent)
     logseq.Editor.registerBlockContextMenuItem("Ollama: Divide into subtasks", DivideTaskIntoSubTasksFromEvent)
     logseq.Editor.registerBlockContextMenuItem("Ollama: Prompt from Block", promptFromBlockEventClosure())
     logseq.Editor.registerBlockContextMenuItem("Ollama: Summarize block", promptFromBlockEventClosure("Summarize: "))
-    logseq.Editor.registerBlockContextMenuItem("Ollama: 总结 Block", promptFromBlockEventClosure("总结: "))
     logseq.Editor.registerBlockContextMenuItem("Ollama: Expand Block", promptFromBlockEventClosure("Expand: "))
-    logseq.Editor.registerBlockContextMenuItem("Ollama: 扩展 Block", promptFromBlockEventClosure("扩展: "))
 
     logseq.App.registerCommandShortcut(
       { "binding": logseq.settings.shortcut },
       ollamaUI
-    );
+    ); 
   }, [])
 
   if (visible) {
