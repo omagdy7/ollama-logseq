@@ -97,8 +97,7 @@ async function ollamaGenerate(prompt: string, parameters?: OllamaGenerateParamet
       throw new Error("Error in Ollama request: " + response.statusText)
     }
     const data = await response.json()
-    return data.response
-
+    return data
   } catch (e: any) {
     console.error("ERROR: ", e)
     logseq.App.showMsg("Coudln't fulfull request make sure that ollama service is running and make sure there is no typo in host or model name")
@@ -199,30 +198,48 @@ async function getOllamaParametersFromBlockProperties(b: BlockEntity) {
   return ollamaParameters
 }
 
-export async function promptFromBlockEvent(b: IHookEvent) {
-  try {
-    const currentBlock = await logseq.Editor.getBlock(b.uuid)
-    const answerBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, '🦙Generating ...', { before: false })
-    const params = await getOllamaParametersFromBlockProperties(currentBlock!)
-    const prompt = currentBlock!.content.replace(/^.*::.*$/gm, '') // nasty hack to remove properties from block content
-    const response = await ollamaGenerate(prompt, params);
-
-    await logseq.Editor.updateBlock(answerBlock!.uuid, `${response}`)
-  } catch (e: any) {
-    logseq.UI.showMsg(e.toString(), 'warning')
-    console.error(e)
+async function getOllamaParametersFromBlockAndParentProperties(b: BlockEntity) {
+  let p_params: OllamaGenerateParameters = {}
+  if (b.parent) {
+    let parentBlock = await logseq.Editor.getBlock(b.parent.id)
+    if (parentBlock)
+      p_params = await getOllamaParametersFromBlockProperties(parentBlock)
   }
+  const b_params = await getOllamaParametersFromBlockProperties(b)
+  return {...p_params, ...b_params}
 }
 
-export async function expandBlockEvent(b: IHookEvent) {
-  try {
-    const currentBlock = await logseq.Editor.getBlock(b.uuid)
-    const answerBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, '⌛Generating ...', { before: false })
-    const response = await promptLLM(`Expand: ${currentBlock!.content}`);
-    await logseq.Editor.updateBlock(answerBlock!.uuid, `${response}`)
-  } catch (e: any) {
-    logseq.UI.showMsg(e.toString(), 'warning')
-    console.error(e)
+async function promptFromBlock(block: BlockEntity, prefix?: string) {
+  const answerBlock = await logseq.Editor.insertBlock(block!.uuid, '🦙Generating ...', { before: false })
+  const params = await getOllamaParametersFromBlockAndParentProperties(block!)
+  console.log("ollama params", params)
+
+  let prompt = block!.content.replace(/^.*::.*$/gm, '') // hack to remove properties from block content
+  if (prefix) {
+    prompt = prefix + " " + prompt
+  }
+  console.log("prompt", prompt)
+
+  const result = await ollamaGenerate(prompt, params);
+    
+  console.log("ollama response", result)
+
+  if (params.usecontext) { //FIXME: work out the best way to story context
+    await logseq.Editor.upsertBlockProperty(block!.uuid, 'ollama-generate-context', result.context)
+  }
+
+  await logseq.Editor.updateBlock(answerBlock!.uuid, `${result.response}`)
+}
+
+export function promptFromBlockEventClosure(prefix?: string) {
+  return async (event: IHookEvent) => {
+    try {
+      const currentBlock = await logseq.Editor.getBlock(event.uuid)
+      await promptFromBlock(currentBlock!, prefix)
+    } catch (e: any) {
+      logseq.UI.showMsg(e.toString(), 'warning')
+      console.error(e)
+    }
   }
 }
 
@@ -238,18 +255,6 @@ export async function askAI(prompt: string, context: string) {
       response = await promptLLM(`With the context of: ${context}, ${prompt}`)
     }
     await logseq.Editor.updateBlock(block!.uuid, `${prompt}\n${response}`)
-  } catch (e: any) {
-    logseq.App.showMsg(e.toString(), 'warning')
-    console.error(e)
-  }
-}
-
-export async function summarizeBlockFromEvent(b: IHookEvent) {
-  try {
-    const currentBlock = await logseq.Editor.getBlock(b.uuid)
-    let summaryBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, `⌛Summarizing Block...`, { before: true })
-    const summary = await promptLLM(`Summarize the following ${currentBlock!.content}`);
-    await logseq.Editor.updateBlock(summaryBlock!.uuid, `Summary: ${summary}`)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)
