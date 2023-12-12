@@ -16,7 +16,6 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
   - Summarize Block
   - Create a flash card
   - Divide a todo task into subtasks
-- Get model from block properties
 - Respects theming
 - Context menu commands
   - Summarize Block
@@ -27,8 +26,34 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
 - A slash command via /ollama
 - Button in tool bar
 - Settings for changing the host of the model, the model itself and a shortcut to open the plugin command palette
+- Block properties to select model
+- Use configuration page `ollama-logseq-config` to add more context manual commands
 
+## Block Properties
+Ollama offers many different models to choose from for various of tasks. This feature configures model on the per block base and the attribute is also used by its immediate children while using context menu commands for blocks. The properties are named after the [Ollama's generate API](https://github.com/jmorganca/ollama/blob/main/docs/api.md#generate-a-completion) and currently, only the `model` is used. Add the `ollama-generate-model:: model_name` at the end of the block to specify the model to use for the block and its immediate children. 
+```
+Write a SciFi story of Shanghai 2050. 
+ollama-generate-model:: deepseek-llm:7b-chat
+```
+Currently, three context menu commands would be affected by this properties.
+- Ollama: Prompt from Block
+- Ollama: Summarize Block
+- Ollama: Expand Block 
 
+![block-properties](./docs/block-properties.png)
+
+## Configuration Page `ollama-logseq-config`
+The plugin also reads the page `ollama-logseq-config` to add more context commands. The page should be a markdown page with the following format.
+
+```
+ollama-context-menu-title:: Ollama: Extract Keywords
+ollama-prompt-prefix:: Extract 10 keywords from the following:
+```
+
+![config-page](./docs/config-page.png)
+
+Each one of the block with these two properties will create a new context menu command after restarting logseq. The prefix is added in front of the text of the block when the command is invokved on the block. 
+![contxt-menu](./docs/block-contxt-menu.gif)
 # Demo
 ![demo](./docs/demo.gif)
 ![summary](./docs/summary.gif)
