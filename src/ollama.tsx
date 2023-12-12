@@ -199,32 +199,29 @@ async function getOllamaParametersFromBlockProperties(b: BlockEntity) {
 }
 
 async function getOllamaParametersFromBlockAndParentProperties(b: BlockEntity) {
-  let p_params: OllamaGenerateParameters = {}
+  let ollamaParentProperties: OllamaGenerateParameters = {}
   if (b.parent) {
     let parentBlock = await logseq.Editor.getBlock(b.parent.id)
     if (parentBlock)
-      p_params = await getOllamaParametersFromBlockProperties(parentBlock)
+      ollamaParentProperties = await getOllamaParametersFromBlockProperties(parentBlock)
   }
-  const b_params = await getOllamaParametersFromBlockProperties(b)
-  return {...p_params, ...b_params}
+  const ollamaBlockProperties = await getOllamaParametersFromBlockProperties(b)
+  return { ...ollamaParentProperties, ...ollamaBlockProperties }
 }
 
 async function promptFromBlock(block: BlockEntity, prefix?: string) {
   const answerBlock = await logseq.Editor.insertBlock(block!.uuid, '🦙Generating ...', { before: false })
   const params = await getOllamaParametersFromBlockAndParentProperties(block!)
-  console.log("ollama params", params)
 
   let prompt = block!.content.replace(/^.*::.*$/gm, '') // hack to remove properties from block content
   if (prefix) {
     prompt = prefix + " " + prompt
   }
-  console.log("prompt", prompt)
 
   const result = await ollamaGenerate(prompt, params);
-    
-  console.log("ollama response", result)
 
-  if (params.usecontext) { //FIXME: work out the best way to story context
+  //FIXME: work out the best way to story context
+  if (params.usecontext) {
     await logseq.Editor.upsertBlockProperty(block!.uuid, 'ollama-generate-context', result.context)
   }
 

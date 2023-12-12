@@ -45,20 +45,19 @@ function App() {
       return
     }
 
-logseq.Editor.getPageBlocksTree("ollama-logseq-config").then((blocks) => {
-  blocks!.forEach((block) => {
-    logseq.Editor.getBlockProperty(block.uuid, "ollama-context-menu-title").then((title) => {
-      logseq.Editor.getBlockProperty(block.uuid, "ollama-prompt-prefix").then((prompt_prefix) => {
-        logseq.Editor.registerBlockContextMenuItem(title, promptFromBlockEventClosure(prompt_prefix))
+    logseq.Editor.getPageBlocksTree("ollama-logseq-config").then((blocks) => {
+      blocks!.forEach((block) => {
+        logseq.Editor.getBlockProperty(block.uuid, "ollama-context-menu-title").then((title) => {
+          logseq.Editor.getBlockProperty(block.uuid, "ollama-prompt-prefix").then((prompt_prefix) => {
+            logseq.Editor.registerBlockContextMenuItem(title, promptFromBlockEventClosure(prompt_prefix))
+          })
+        }).catch((reason) => {
+        })
       })
     }).catch((reason) => {
+      console.error("Can not find the configuration page named 'ollama-logseq-config'", reason)
     })
-  })
-}).catch((reason) => {
-  console.log("Can not find the configuration page named 'ollama-logseq-config'")
-  console.log(reason)
-})
-    
+
 
     logseq.Editor.registerSlashCommand("ollama", ollamaUI)
     logseq.Editor.registerBlockContextMenuItem("Ollama: Create a flash card", convertToFlashCardFromEvent)
@@ -70,7 +69,7 @@ logseq.Editor.getPageBlocksTree("ollama-logseq-config").then((blocks) => {
     logseq.App.registerCommandShortcut(
       { "binding": logseq.settings.shortcut },
       ollamaUI
-    ); 
+    );
   }, [])
 
   if (visible) {
