@@ -178,12 +178,32 @@ export async function summarizeBlock() {
     const currentBlock = await logseq.Editor.getCurrentBlock()
     let summaryBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, `⌛Summarizing Block...`, { before: false })
     const summary = await promptLLM(`Summarize the following ${currentBlock!.content}`);
+
     await logseq.Editor.updateBlock(summaryBlock!.uuid, `Summary: ${summary}`)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)
   }
 }
+
+export async function customPromptBlock() {
+  try {
+    if (!logseq.settings) {
+      throw new Error("Couldn't find ollama-logseq settings")
+    }
+  
+    // TODO: Get contnet of current block and subblocks
+    const currentBlock = await logseq.Editor.getCurrentBlock()
+    let customPromptBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, `⌛Apply custom prompt...`, { before: false })
+    const customPrompt = await promptLLM(`${logseq.settings.custom_prompt_block} ${currentBlock!.content}`);
+     
+    await logseq.Editor.updateBlock(customPromptBlock!.uuid, `${customPrompt}`)
+  } catch (e: any) {
+    logseq.App.showMsg(e.toString(), 'warning')
+    console.error(e)
+  }
+}
+
 
 async function getOllamaParametersFromBlockProperties(b: BlockEntity) {
   const properties = await logseq.Editor.getBlockProperties(b.uuid);

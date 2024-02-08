@@ -15,6 +15,7 @@ const options = [
   'Divide into subtasks',
   'Summarize',
   'Summarize Block',
+  'Custom prompt on block',
   'Convert to flash card',
 ];
 
