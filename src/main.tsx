@@ -36,13 +36,6 @@ let settings: SettingSchemaDesc[] = [
     description: "Shortcut to open plugin command pallete",
     default: "mod+shift+o"
   },
-  {
-    key: "custom_prompt_block",
-    type: "string",
-    title: "Custom prompt block",
-    description: "Define your custom prompt and use a block as context",
-    default: "Translate in French : "
-  },
 ]
 
 
