@@ -178,12 +178,15 @@ export async function summarizeBlock() {
     const currentBlock = await logseq.Editor.getCurrentBlock()
     let summaryBlock = await logseq.Editor.insertBlock(currentBlock!.uuid, `⌛Summarizing Block...`, { before: false })
     const summary = await promptLLM(`Summarize the following ${currentBlock!.content}`);
+
     await logseq.Editor.updateBlock(summaryBlock!.uuid, `Summary: ${summary}`)
   } catch (e: any) {
     logseq.App.showMsg(e.toString(), 'warning')
     console.error(e)
   }
 }
+
+
 
 async function getOllamaParametersFromBlockProperties(b: BlockEntity) {
   const properties = await logseq.Editor.getBlockProperties(b.uuid);
