@@ -6,7 +6,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import { convertToFlashCardCurrentBlock, DivideTaskIntoSubTasksCurrentBlock, summarize, summarizeBlock } from "@/ollama";
+import { convertToFlashCardCurrentBlock, DivideTaskIntoSubTasksCurrentBlock, summarizePage, summarizeBlock } from "@/ollama";
 import { PromptAI } from "./PromptAI";
 
 export function OllamaCommandPallete({ options, theme }: { options: string[], theme: string }) {
@@ -20,9 +20,9 @@ export function OllamaCommandPallete({ options, theme }: { options: string[], th
         logseq.hideMainUI()
         DivideTaskIntoSubTasksCurrentBlock()
         break;
-      case "summarize":
+      case "summarize page":
         logseq.hideMainUI()
-        summarize()
+        summarizePage()
         break;
       case "summarize block":
         logseq.hideMainUI()
@@ -51,12 +51,14 @@ export function OllamaCommandPallete({ options, theme }: { options: string[], th
     };
   }, []);
 
-  if (isEnterPressed && (selection !== 'ask ai' && selection !== 'define' && selection !== 'ask with context')) {
-    return null
+  const validSelections = ['ask with page context', 'ask with block context', 'ask ai', 'define', 'ask with context'];
+
+  if (isEnterPressed && !validSelections.includes(selection)) {
+    return null;
   }
 
   return (
-    selection === 'ask with context' || selection === 'ask ai' || selection === 'define' ? (<PromptAI theme={theme} type={selection} />) : (
+    validSelections.includes(selection) ? (<PromptAI theme={theme} type={selection} />) : (
       <Command className={(theme === 'dark' ? "dark dark:bg-gray-900" : "bg-gray-200") + " rounded-lg border shadow-md w-1/2"}>
         <CommandInput className="ai-input" placeholder="Type a command or search..." />
         <CommandList>

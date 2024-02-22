@@ -134,16 +134,22 @@ async function promptLLM(prompt: string) {
 }
 
 export async function defineWord(word: string) {
-  askAI(`What's the defintion of ${word}`, "")
+  askAI(`What's the defintion of ${word}?`, "")
 }
 
+type ContextType = 'block' | 'page'
 
-export async function askWithContext(prompt: string) {
+export async function askWithContext(prompt: string, contextType: ContextType) {
   try {
-    const currentBlocksTree = await logseq.Editor.getCurrentPageBlocksTree()
     let blocksContent = ""
-    for (const block of currentBlocksTree) {
-      blocksContent += await getTreeContent(block)
+    if (contextType === 'page') {
+      const currentBlocksTree = await logseq.Editor.getCurrentPageBlocksTree()
+      for (const block of currentBlocksTree) {
+        blocksContent += await getTreeContent(block)
+      }
+    } else {
+      const currentBlock = await logseq.Editor.getCurrentBlock()
+      blocksContent += await getTreeContent(currentBlock!)
     }
     askAI(prompt, `Context: ${blocksContent}`)
   } catch (e: any) {
@@ -152,7 +158,7 @@ export async function askWithContext(prompt: string) {
   }
 }
 
-export async function summarize() {
+export async function summarizePage() {
   await delay(300)
   try {
     const currentSelectedBlocks = await logseq.Editor.getCurrentPageBlocksTree()
@@ -247,7 +253,12 @@ export async function askAI(prompt: string, context: string) {
   await delay(300)
   try {
     const currentBlock = await logseq.Editor.getCurrentBlock()
-    const block = await logseq.Editor.insertBlock(currentBlock!.uuid, '⌛Generating....', { before: true })
+    let block = null;
+    if (currentBlock?.content.trim() === '') {
+      block = await logseq.Editor.insertBlock(currentBlock!.uuid, '⌛Generating....', { before: true })
+    } else {
+      block = await logseq.Editor.insertBlock(currentBlock!.uuid, '⌛Generating....', { before: false })
+    }
     let response = "";
     if (context == "") {
       response = await promptLLM(prompt)

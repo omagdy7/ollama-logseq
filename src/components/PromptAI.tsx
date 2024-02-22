@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 
 export const PromptAI = ({ type, theme }: { type: string, theme: string }) => {
 
-  const placeholder = type === 'ask ai' ? "Prompt..." : "Define..."
+  const placeholder = type.startsWith('ask') ? "Prompt..." : "Define..."
   const [inputValue, setInputValue] = useState('');
   const [hitEnter, setHitEnter] = useState(false)
 
@@ -15,8 +15,10 @@ export const PromptAI = ({ type, theme }: { type: string, theme: string }) => {
         askAI(inputValue, "")
       } else if (type === 'define') {
         defineWord(inputValue)
-      } else if (type === 'ask with context') {
-        askWithContext(inputValue)
+      } else if (type === 'ask with page context') {
+        askWithContext(inputValue, 'page')
+      } else if (type === 'ask with block context') {
+        askWithContext(inputValue, 'block')
       }
     }
   }, [hitEnter])

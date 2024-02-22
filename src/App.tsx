@@ -10,10 +10,11 @@ import { useAppVisible } from "./utils";
 
 const options = [
   'Ask ai',
-  'Ask with context',
+  'Ask with page context',
+  'Ask with block context',
   'Define',
   'Divide into subtasks',
-  'Summarize',
+  'Summarize Page',
   'Summarize Block',
   'Convert to flash card',
 ];
