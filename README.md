@@ -11,8 +11,9 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
 # Features
 - The plugin currently has 6 commands
   - Ask Ai -> which is a prompt the AI freely without any context
-  - Ask Ai with context -> This is the same as Ask Ai but it gives the model the context of the current page
-  - Summarize -> Summarizs the whole page
+  - Ask Ai with page context -> This is the same as Ask Ai but it gives the model the context of the current page
+  - Ask Ai with block context -> This is the same as Ask Ai but it gives the model the context of the current block
+  - Summarize Page
   - Summarize Block
   - Create a flash card
   - Divide a todo task into subtasks
@@ -21,7 +22,8 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
   - Summarize Block
   - Make a flash card
   - Divide task into subtasks
-  - Prompt from block
+  - Prompt from block (uses the block as a prompt)
+  - Custom prompt on block (uses the custom prompt defined in settings on the block)
   - Expand block
 - A slash command via /ollama
 - Button in tool bar

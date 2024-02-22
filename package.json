@@ -1,6 +1,6 @@
 {
   "name": "ollama-logseq",
-  "version": "1.0.9",
+  "version": "1.1.2",
   "main": "dist/index.html",
   "scripts": {
     "dev": "vite",
