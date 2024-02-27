@@ -37,7 +37,7 @@ async function getTreeContent(b: BlockEntity) {
         includeChildren: true,
       });
       if (childBlock) {
-        content += await getTreeContent(childBlock);
+        content += "\n" + await getTreeContent(childBlock);
       }
     }
   }
@@ -93,14 +93,14 @@ async function ollamaGenerate(prompt: string, parameters?: OllamaGenerateParamet
       body: JSON.stringify(params)
     })
     if (!response.ok) {
-      logseq.UI.showMsg("Coudln't fulfull request make sure that ollama service is running and make sure there is no typo in host or model name")
+      logseq.UI.showMsg("Coudln't fulfill request make sure that ollama service is running and make sure there is no typo in host or model name")
       throw new Error("Error in Ollama request: " + response.statusText)
     }
     const data = await response.json()
     return data
   } catch (e: any) {
     console.error("ERROR: ", e)
-    logseq.App.showMsg("Coudln't fulfull request make sure that ollama service is running and make sure there is no typo in host or model name")
+    logseq.App.showMsg("Coudln't fulfill request make sure that ollama service is running and make sure there is no typo in host or model name")
   }
 }
 
@@ -121,7 +121,7 @@ async function promptLLM(prompt: string) {
       }),
     })
     if (!response.ok) {
-      logseq.App.showMsg("Coudln't fulfull request make sure that ollama service is running and make sure there is no typo in host or model name")
+      logseq.App.showMsg("Coudln't fulfill request make sure that ollama service is running and make sure there is no typo in host or model name")
       throw new Error("Error in Ollama request: " + response.statusText)
     }
     const data = await response.json();
@@ -129,7 +129,7 @@ async function promptLLM(prompt: string) {
     return data.response;
   } catch (e: any) {
     console.error("ERROR: ", e)
-    logseq.App.showMsg("Coudln't fulfull request make sure that ollama service is running and make sure there is no typo in host or model name")
+    logseq.App.showMsg("Coudln't fulfill request make sure that ollama service is running and make sure there is no typo in host or model name")
   }
 }
 
@@ -221,10 +221,13 @@ async function getOllamaParametersFromBlockAndParentProperties(b: BlockEntity) {
 async function promptFromBlock(block: BlockEntity, prefix?: string) {
   const answerBlock = await logseq.Editor.insertBlock(block!.uuid, '🦙Generating ...', { before: false })
   const params = await getOllamaParametersFromBlockAndParentProperties(block!)
+  const blockContent = await getTreeContent(block);
 
-  let prompt = block!.content.replace(/^.*::.*$/gm, '') // hack to remove properties from block content
+  // let prompt = block!.content.replace(/^.*::.*$/gm, '') // hack to remove properties from block content
+
+  let prompt = blockContent;
   if (prefix) {
-    prompt = prefix + " " + prompt
+    prompt = prefix + "\n" + prompt
   }
 
   const result = await ollamaGenerate(prompt, params);
