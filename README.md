@@ -6,8 +6,6 @@ A plugin to integrate [ollama](https://github.com/jmorganca/ollama) with [logseq
 - First you will need to setup [ollama](https://github.com/jmorganca/ollama) you can check their github repo for instructions on how to setup ollama
 - That's it once you setup ollama you should be able to use the plugin with no problem
 
-> Note: If you are on windows make sure to open WSL in the background for the model to work properly
-
 # Features
 - The plugin currently has 6 commands
   - Ask Ai -> which is a prompt the AI freely without any context
