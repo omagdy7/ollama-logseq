@@ -27,7 +27,7 @@ let settings: SettingSchemaDesc[] = [
     type: "string",
     title: "LLM Model",
     description: "Set your desired model to use ollama",
-    default: "mistral:instruct"
+    default: "llama3.1:8b"
   },
   {
     key: "shortcut",
