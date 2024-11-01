@@ -279,7 +279,7 @@ export async function convertToFlashCard(uuid: string, blockContent: string) {
   try {
     const questionBlock = await logseq.Editor.insertBlock(uuid, "⌛Genearting question....", { before: false })
     const answerBlock = await logseq.Editor.insertBlock(questionBlock!.uuid, "⌛Genearting answer....", { before: false })
-    const question = await promptLLM(`Create a question about this that would fit in a flashcard:\n ${blockContent}`)
+    const question = await promptLLM(`Create a question for a flashcard. Provide the question only. Here is the knowledge to check:\n ${blockContent}`)
     const answer = await promptLLM(`Given the question ${question} and the context of ${blockContent} What is the answer? be as brief as possible and provide the answer only.`)
     await logseq.Editor.updateBlock(questionBlock!.uuid, `${question} #card`)
     await delay(300)
