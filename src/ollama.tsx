@@ -134,7 +134,7 @@ async function promptLLM(prompt: string) {
 }
 
 export async function defineWord(word: string) {
-  askAI(`What's the defintion of ${word}?`, "")
+  askAI(`What's the definition of ${word}?`, "")
 }
 
 type ContextType = 'block' | 'page'
